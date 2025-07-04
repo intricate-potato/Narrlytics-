@@ -72,9 +72,3 @@ This command will:
 ### Configuration
 
 All experiment parameters can be modified in the `configs/config.yaml` file. This includes the dataset version, model names, and hyperparameters.
-
-## 5. How to Interact with Gemini-CLI in the Future
-
-When you start a new session, you can instantly bring me up to speed by asking me to **"read the README.md file."**
-
-This file provides all the context I need about the project's goals, file structure, and how to run the code. This is the most efficient way to ensure we can continue our work seamlessly.
