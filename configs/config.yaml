@@ -1,0 +1,58 @@
+data:
+  mind_dataset_path: "data/mind/"
+  mind_version: "small"
+  mind_train_url: "https://mind201910small.blob.core.windows.net/release/MINDsmall_train.zip"
+  mind_dev_url: "https://mind201910small.blob.core.windows.net/release/MINDsmall_dev.zip"
+  cache_path: "data/cache/"
+  max_title_length: 30
+  max_abstract_length: 200
+  combine_title_abstract: true
+  cache_extracted_actants: true
+  cache_embeddings: true
+
+model:
+  llm_model_name: "llama3"
+  ollama_api_url: "http://localhost:11434/api/generate"
+  llm_max_length: 512
+  llm_temperature: 0.0
+  llm_do_sample: false
+  llm_max_new_tokens: 256
+  embedding_model_name: "intfloat/e5-large"
+  embedding_dimension: 1024
+  reduced_dimension: 34
+  svd_random_state: 42
+  svd_n_iter: 5
+
+recommendation:
+  methods: ["narrative", "content", "hybrid", "diverse"]
+  top_k: [5, 10, 20]
+  hybrid_alpha: 0.5
+  diversity_lambda: 0.3
+  batch_size: 128
+
+training:
+  num_epochs: 10
+  learning_rate: 0.001
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  negative_sampling_ratio: 4
+
+evaluation:
+  metrics: ["auc", "mrr", "ndcg@5", "ndcg@10", "precision@5", "precision@10"]
+  diversity_metrics: ["narrative_diversity", "intra_list_distance", "coverage"]
+
+visualization:
+  umap_n_neighbors: 15
+  umap_min_dist: 0.1
+  umap_n_components: 2
+  umap_metric: "cosine"
+  n_clusters: 18
+  clustering_method: "agglomerative"
+
+experiment:
+  random_seed: 42
+  num_workers: 4
+  use_gpu: true
+  checkpoint_interval: 1000
+  log_interval: 100
