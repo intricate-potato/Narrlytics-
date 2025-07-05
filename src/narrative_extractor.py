@@ -53,19 +53,31 @@ class NarrativeExtractor:
             response = requests.post(self.api_url, json=payload)
             response.raise_for_status()
             
-            # The response from Ollama with format="json" is a single JSON object.
-            # We need to parse the 'response' field which is a JSON string.
-            ollama_response_content = response.json()['response']
-            actants = json.loads(ollama_response_content)
-            return self.post_process_actants(actants)
+            # The 'response' field from Ollama is a JSON string that might be embedded in other text.
+            ollama_response_content = response.json().get('response', '')
+            
+            # Find the start and end of the JSON object to handle malformed responses
+            start_index = ollama_response_content.find('{')
+            end_index = ollama_response_content.rfind('}')
+            
+            if start_index != -1 and end_index != -1 and start_index < end_index:
+                json_str = ollama_response_content[start_index:end_index+1]
+                try:
+                    actants = json.loads(json_str)
+                    return self.post_process_actants(actants)
+                except json.JSONDecodeError:
+                    print(f"Failed to decode extracted JSON: {json_str}")
+                    return {actant: [] for actant in ["Sender", "Receiver", "Subject", "Object", "Helper", "Opponent"]}
+            else:
+                print(f"No valid JSON object found in response: {ollama_response_content}")
+                return {actant: [] for actant in ["Sender", "Receiver", "Subject", "Object", "Helper", "Opponent"]}
 
         except requests.exceptions.RequestException as e:
             print(f"Error connecting to Ollama: {e}")
-            # Return a default empty structure on connection/request errors
             return {actant: [] for actant in ["Sender", "Receiver", "Subject", "Object", "Helper", "Opponent"]}
         except json.JSONDecodeError:
-            print(f"Failed to decode JSON from Ollama response: {ollama_response_content}")
-            # Return a default empty structure on JSON decoding errors
+            # This can happen if the main response body is not JSON
+            print(f"Failed to decode the main JSON response from Ollama: {response.text}")
             return {actant: [] for actant in ["Sender", "Receiver", "Subject", "Object", "Helper", "Opponent"]}
 
     def batch_extract_actants(self, articles):

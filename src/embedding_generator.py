@@ -42,9 +42,22 @@ class NarrativeEmbeddingGenerator:
         return reduced_embeddings
 
     def create_narrative_embedding(self, reduced_actants):
-        # Ensure consistent ordering across all articles
-        # Ensure elements are numpy arrays before concatenating
-        return np.concatenate([np.array(reduced_actants[actant]) for actant in sorted(reduced_actants.keys())]).tolist() # Convert to list for JSON
+        # Convert lists back to numpy arrays for vector operations
+        subject_emb = np.array(reduced_actants['Subject'])
+        object_emb = np.array(reduced_actants['Object'])
+        sender_emb = np.array(reduced_actants['Sender'])
+        receiver_emb = np.array(reduced_actants['Receiver'])
+        helper_emb = np.array(reduced_actants['Helper'])
+        opponent_emb = np.array(reduced_actants['Opponent'])
+
+        # Create axis-based embeddings using vector subtraction
+        desire_axis = subject_emb - object_emb
+        communication_axis = receiver_emb - sender_emb
+        conflict_axis = helper_emb - opponent_emb
+
+        # Concatenate the three axis vectors
+        final_embedding = np.concatenate([desire_axis, communication_axis, conflict_axis])
+        return final_embedding.tolist() # Convert to list for JSON
 
     def process_article_batch(self, articles):
         embeddings = {}
