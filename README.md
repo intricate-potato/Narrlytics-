@@ -66,7 +66,7 @@ This command will:
 1.  Load the configuration from `configs/config.yaml`.
 2.  Download the MIND dataset into the `data/mind/` directory if it's not already present.
 3.  Extract narrative actants from news articles using Ollama. **This process is cached** in `data/cache/actants/`. If you stop and restart the script, it will resume from where it left off.
-4.  Generate narrative-structured embeddings for each article.
+4.  Generate narrative-structured embeddings for each article. The embedding construction is based on three relationship axes: the "desire" axis (Subject - Object), the "communication" axis (Receiver - Sender), and the "conflict" axis (Helper - Opponent). These axes are concatenated to form the final embedding.
 5.  (Future implementation) Train recommendation models and run evaluations.
 
 ### Configuration

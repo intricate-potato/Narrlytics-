@@ -347,10 +347,12 @@ Core Methods:
    - Return reduced embeddings
 
 3. create_narrative_embedding(reduced_actants: Dict[str, np.ndarray]) -> np.ndarray:
-   - Concatenate in fixed order: [Subject, Object, Sender, Receiver, Helper, Opponent]
-   - Ensure consistent ordering across all articles
-   - Result: 6 * 34 = 204 dimensional vector
-   - Normalize if specified in config
+   - Construct three relationship axes based on vector subtraction:
+     * **Desire Axis:** Subject embedding - Object embedding
+     * **Communication Axis:** Receiver embedding - Sender embedding
+     * **Conflict Axis:** Helper embedding - Opponent embedding
+   - Concatenate the three axis vectors in a fixed order: [Desire, Communication, Conflict]
+   - Result: 3 * 34 = 102 dimensional vector
    - Return final narrative embedding
 
 4. process_article_batch(articles: List[Tuple[str, Dict]], fitted_svd=None) -> Dict[str, np.ndarray]:

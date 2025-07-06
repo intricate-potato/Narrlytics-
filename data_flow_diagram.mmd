@@ -1,0 +1,14 @@
+graph TD
+    A["Raw News Articles (MIND Dataset)"] --> B["src/data_loader.py"]
+    B --> C["Processed News Data"]
+    C --> D["src/narrative_extractor.py"]
+    D -- "Article Text" --> E["Ollama (Llama 3 LLM)"]
+    E -- "JSON Actants" --> D
+    D --> F["data/cache/actants/"]
+    F --> D
+    D --> G["src/embedding_generator.py"]
+    G -- "Actant Embeddings" --> H["TruncatedSVD (Dimension Reduction)"]
+    H --> G
+    G --> I["data/cache/embeddings/"]
+    I --> G
+    G --> J["Further Processing (e.g., Recommender)"]

@@ -1,0 +1,14 @@
+graph TD
+    A["User"] --> B["main.py"]
+    B --> C["configs/config.yaml"]
+    B --> D["src/ (Source Code)"]
+    B --> E["data/ (Raw & Cached Data)"]
+    B --> F["models/ (Saved Models)"]
+    B --> G["results/ (Outputs)"]
+
+    D --> E
+    E --> D
+    D --> F
+    F --> D
+    D --> G
+
