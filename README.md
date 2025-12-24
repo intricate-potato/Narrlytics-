@@ -1,74 +1,39 @@
-# Narrative-Based News Recommendation System
+# Narrlytics: Narrative-Aware News Recommendation
 
 ## 1. Project Overview
 
-This project implements a complete Python system for narrative-based news recommendation. It follows the methodology from the paper "Mapping News Narratives Using LLMs and Narrative-Structured Text Embeddings," adapted for use with the Microsoft MIND dataset.
+This project implements a narrative-aware news recommendation system that leverages Greimas' Actantial Model—a structuralist framework from semiotics—to extract and model the underlying narrative structure of news articles. By representing "who did what to whom" through six functional roles (Subject, Object, Helper, Opponent, Sender, Receiver), the system captures narrative dimensions that traditional content-based and collaborative filtering approaches miss.
 
-The core idea is to extract the underlying narrative structure (the "who did what to whom") from news articles using a Large Language Model (LLM) and then use these structured narratives to generate more diverse and relevant recommendations.
+## 2. Approach
 
-## 2. System Architecture
+### Phase 1: Actant Extraction
+- Use LLM (LLaMA-8B) to extract six Greimas actants from news titles/abstracts
+- Filter noisy extractions to retain semantically meaningful entities
+- Output: 20,540 filtered actants from 65,228 news articles
 
-The project is organized into the following directory structure:
+### Phase 2: Heterogeneous Graph Construction
+- **Node Types**: Users, News Articles, Actants
+- **Edge Types**: 
+  - User–News (clicks with temporal decay)
+  - News–Actant (containment)
+  - Actant–Actant (co-occurrence & co-click)
 
-```
-narrative-news-recommendation/
-├── configs/              # Experiment configuration (config.yaml)
-├── data/
-│   ├── mind/             # Raw MIND dataset files will be downloaded here
-│   └── cache/            # Cached data to speed up re-runs
-│       ├── actants/      # Cached LLM-extracted narratives
-│       └── embeddings/   # Cached article embeddings
-├── models/               # Saved model files (e.g., SVD models)
-├── notebooks/            # Jupyter notebooks for analysis and exploration
-├── results/              # Output for metrics, figures, and reports
-├── src/                  # All Python source code
-├── tests/                # Unit and integration tests
-├── main.py               # Main script to run the entire pipeline
-├── requirements.txt      # Python dependencies
-└── README.md             # This documentation file
-```
+### Phase 3: HeteroGAT Training
+- Heterogeneous Graph Attention Network with type-specific attention
+- BPR loss for implicit feedback ranking
+- Node features: category embeddings, narrative role encodings, learnable embeddings
 
-## 3. Setup and Installation
+## 3. Results
 
-To set up the environment and run this project, follow these steps:
+| Model | Prec@5 | nDCG@5 | MRR |
+|-------|--------|--------|-----|
+| Bipartite GAT | 0.0808 | 0.2342 | 0.2584 |
+| **HeteroGAT (Ours)** | **0.0912** | **0.2476** | **0.2724** |
 
-### Step 1: Install Python Dependencies
+Performance within ~10% of state-of-the-art graph-based news recommenders, with significant room for improvement through richer actant extraction from full article bodies.
 
-All required Python libraries are listed in `requirements.txt`. Install them using pip:
+## 4. Dataset
 
-```bash
-pip install -r requirements.txt
-```
+Microsoft MIND dataset (MIND-small): 50,000 users, 65,238 news articles, 347,727 click interactions.
 
-### Step 2: Set Up Ollama
-
-This project uses a local Ollama instance to run the Llama 3 model for narrative extraction. 
-
-1.  **Ensure Ollama is running:** The Ollama application must be running on your machine before executing the Python script.
-2.  **Pull the Llama 3 model:** If you haven't already, download the necessary model by running the following command in your terminal:
-    ```bash
-    ollama pull llama3
-    ```
-
-## 4. Running the Experiment
-
-The entire experimental pipeline is orchestrated by the `main.py` script.
-
-### To run the full pipeline:
-
-Execute the following command from the root of the project directory (`/home/intricate-potato/Desktop/llam/news-rec/`):
-
-```bash
-python main.py
-```
-
-This command will:
-1.  Load the configuration from `configs/config.yaml`.
-2.  Download the MIND dataset into the `data/mind/` directory if it's not already present.
-3.  Extract narrative actants from news articles using Ollama. **This process is cached** in `data/cache/actants/`. If you stop and restart the script, it will resume from where it left off.
-4.  Generate narrative-structured embeddings for each article. The embedding construction is based on three relationship axes: the "desire" axis (Subject - Object), the "communication" axis (Receiver - Sender), and the "conflict" axis (Helper - Opponent). These axes are concatenated to form the final embedding.
-5.  (Future implementation) Train recommendation models and run evaluations.
-
-### Configuration
-
-All experiment parameters can be modified in the `configs/config.yaml` file. This includes the dataset version, model names, and hyperparameters.
+**Key Limitation**: MIND provides only titles/abstracts; original URLs have expired, preventing full article body retrieval for richer actant extraction.
